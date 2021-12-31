@@ -7,6 +7,8 @@
         update_cache: yes
 
     - name: Upgrade all packages on servers
+      async: 800
+      poll: 05
       apt:
         name: "*"
         state: latest
