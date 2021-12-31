@@ -1,0 +1,12 @@
+- name: Update Ubuntu packages
+  hosts: all
+  become: 'True'
+  tasks:
+    - name: Update cache
+      apt:
+        update_cache: yes
+
+    - name: Upgrade all packages on servers
+       apt:
+        name: "*"
+         state: latest
