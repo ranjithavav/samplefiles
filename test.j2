@@ -1,0 +1,8 @@
+{% for item in ansible_play_batch %}
+Host: {{item}}
+attached devices:
+  {% for a in range(hostvars[item].volume_id.volumes|length) %}
+    {{hostvars[item].volume_id.volumes[a].attachment_set[0].device}}
+  {% endfor %}
+  
+{% endfor %}

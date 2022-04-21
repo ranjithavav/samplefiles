@@ -1,0 +1,65 @@
+---
+ - hosts: all
+   tasks:
+    - amazon.aws.ec2_metadata_facts:
+
+    - name: Get volumes
+      amazon.aws.ec2_vol_info:
+        filters:
+          attachment.instance-id: "{{ ansible_ec2_instance_id }}"
+      delegate_to: 127.0.0.1
+      register: volume_id
+    - ansible.builtin.debug:
+        msg: "{{volume_id.volumes[item|int].attachment_set[0].device}}"
+      with_sequence: count="{{ volume_id.volumes|length }}" start=0
+
+
+    - ansible.builtin.debug:
+        msg: "{{ lookup('template', 'test.j2') }}"
+      delegate_to: localhost
+      run_once: True
+
+    - mail:
+        host: localhost
+        port: 25
+        to: ranjith@localhost
+        subject: Ansible-report
+        body: "{{ lookup('template', 'test.j2') }}"
+      delegate_to: localhost
+      run_once: True
+
+    # - ansible.builtin.debug:
+    #     msg: "{{item.attachment_set[0].device}}"
+    #   delegate_to: 127.0.0.1
+    #   loop: "{{volume_id.volumes}}"
+      
+    # - name: Taking snapshot of volume
+    #   amazon.aws.ec2_snapshot:
+    #     instance_id: "{{ ansible_ec2_instance_id }}"
+    #     device_name: "{{volume_id.volumes[item].attachment_set[0]['device']}}"
+    #     description: 'description'
+    #     region: "{{ ansible_ec2_instance_identity_document_region  }}"
+    #     wait: yes
+    #     snapshot_tags:
+    #       Name: "{{ ansible_ec2_local_hostname }}"
+    #       manual: 'true'
+    #       month: "{{ ansible_date_time.month }}_{{ ansible_date_time.year}}"
+    #   delegate_to: 127.0.0.1
+    #   with_sequence: count="{{ volume_id.volumes|length | int }}" start=0
+    #   register: snap2
+
+    # - name: snapshot details
+    #   ansible.builtin.debug:
+    #     msg:
+    #       - Host {{inventory_hostname}}, device {{ snap2.results[item].invocation.module_args.device_name }}, SnapShotID {{ snap2.results[item].snapshot_id }}
+    #   with_sequence: count="{{ volume_id.volumes|length |int}}" start=0
+    #   register: mail
+
+    # - mail:
+    #     host: localhost
+    #     port: 25
+    #     to: ranjith@localhost
+    #     subject: Ansible-report
+    #     body: "{{ lookup('template', 'test.j2') }}"
+    #   delegate_to: localhost
+    #   run_once: True
